@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import Image from "../../../public/images/imgAboutHome.png";
 
 

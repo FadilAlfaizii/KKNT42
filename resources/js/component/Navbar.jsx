@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import React, { useState } from "react";
 import { Menu, X } from "react-feather";
 import Logo from "../../../public/images/Logo.png";
@@ -35,22 +35,34 @@ const Navbar = () => {
                         Beranda
                     </Link>
                     <Link
-                        href={"/tentang"}
+                        href="/tentang"
                         className="text-black hover:text-gray-600 transition duration-200"
                     >
                         Tentang
                     </Link>
                     <Link
-                        href={"/peternakan"}
+                        href="/peternakan"
                         className="text-black hover:text-gray-600 transition duration-200"
                     >
                         Peternakan
                     </Link>
                     <Link
-                        href={"/profil"}
+                        href="/profil"
                         className="text-black hover:text-gray-600 transition duration-200"
                     >
                         Profil Pemilik Ternak
+                    </Link>
+                    <Link
+                        href="/map"
+                        className="text-black hover:text-gray-600 transition duration-200"
+                    >
+                        Peta Desa
+                    </Link>
+                    <Link
+                        href="/penduduk"
+                        className="text-black hover:text-gray-600 transition duration-200"
+                    >
+                        Data Penduduk
                     </Link>
                 </div>
 
@@ -93,22 +105,28 @@ const Navbar = () => {
                         Beranda
                     </Link>
                     <Link
-                        href={"/tentang"}
+                        href="/tentang"
                         className="text-black hover:text-gray-600 transition duration-200"
                     >
                         Tentang
                     </Link>
                     <Link
-                        href={"/peternakan"}
+                        href="/peternakan"
                         className="text-black hover:text-gray-600 transition duration-200"
                     >
                         Peternakan
                     </Link>
                     <Link
-                        href={"/profil"}
+                        href="/profil"
                         className="text-black hover:text-gray-600 transition duration-200"
                     >
                         Profil Pemilik Ternak
+                    </Link>
+                    <Link
+                        href="/map"
+                        className="text-black hover:text-gray-600 transition duration-200"
+                    >
+                        Peta Desa
                     </Link>
                     <button
                         onClick={handleClick}

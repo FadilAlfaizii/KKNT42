@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/inertia-react';
+import { Link } from '@inertiajs/react';
 import hero from '../../../public/images/hero.png'
 
 const Hero = () => {

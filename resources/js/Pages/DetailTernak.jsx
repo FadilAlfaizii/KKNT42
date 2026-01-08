@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Layout from "../Layouts/Layout";
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import SeoHead from "../component/SeoHead";
 import {
     User,

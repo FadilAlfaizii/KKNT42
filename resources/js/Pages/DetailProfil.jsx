@@ -1,6 +1,6 @@
 import React from "react";
 import Layout from "../Layouts/Layout";
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import { User, Star, MapPin, Phone } from "lucide-react";
 import { getBaseUrl } from "../helpers/baseUrl";
 import SEOHead from "../component/SeoHead";

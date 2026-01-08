@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import Layout from "../Layouts/Layout";
 import Hero from "../component/Hero";
 import TentangHome from "../component/TentangHome";
@@ -170,6 +170,28 @@ const Home = ({ farms }) => {
             <Hero />
             <Layout>
                 <TentangHome />
+                
+                {/* Peta Desa Section */}
+                <div className="py-16 bg-white">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="text-center mb-12">
+                            <h2 className="text-2xl md:text-3xl font-bold text-HoverGreen mb-3">
+                                Peta Desa Sindang Anom
+                            </h2>
+                            <p className="text-gray-600 text-base md:text-lg">
+                                Jelajahi peta geografis dan fasilitas desa secara interaktif
+                            </p>
+                        </div>
+                        <div className="flex justify-center">
+                            <Link href="/map">
+                                <button className="bg-green hover:bg-HoverGreen text-white font-semibold px-8 py-3 rounded-lg transition duration-200 shadow-md">
+                                    Buka Peta Interaktif
+                                </button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+                
                 {/* <StokPage /> */}
                 <div className="min-h-screen overflow-x-hidden bg-green flex flex-col items-center pt-16 px-4 pb-20">
                     <div className="text-center text-white mb-10 md:mb-20">

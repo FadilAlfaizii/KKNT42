@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import Navbar from "../component/Navbar";
 import HeroCustom from "../component/HeroCustom";
 import Layout from "../Layouts/Layout";

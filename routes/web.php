@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\FarmController;
+use App\Http\Controllers\MapController;
+use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -31,5 +33,8 @@ Route::get('/detailprofil/{user}', [UserController::class, 'show'])->name('Detai
 
 
 Route::get('/detailprofil', function () {
-    return Inertia::render('DetailProfil');
-});
+    return Inertia::render('DetailProfil');});
+
+Route::get('/map', [MapController::class, 'index'])->name('map.index');
+
+Route::get('/penduduk', [PendudukController::class, 'index'])->name('penduduk.index');
