@@ -5,7 +5,8 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\User;
-use App\Models\Farm;
+use App\Models\Article;
+use App\Models\IotSensors;
 
 class Stats extends BaseWidget
 {
@@ -17,14 +18,14 @@ class Stats extends BaseWidget
                 ->icon('heroicon-o-user')
                 ->color('success'),
 
-            Stat::make('Total Peternakan', Farm::count())
-                ->description('Jumlah peternakan')
-                ->icon('heroicon-o-home')
+            Stat::make('Total Artikel', Article::count())
+                ->description('Jumlah artikel & berita')
+                ->icon('heroicon-o-newspaper')
                 ->color('primary'),
 
-            Stat::make('Peternakan Aktif', Farm::where('is_active', true)->count())
-                ->description('Jumlah peternakan aktif')
-                ->icon('heroicon-o-check-circle')
+            Stat::make('Sensor IoT Aktif', IotSensors::count())
+                ->description('Jumlah sensor aktif')
+                ->icon('heroicon-o-cpu-chip')
                 ->color('warning'),
         ];
     }

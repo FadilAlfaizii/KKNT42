@@ -1,0 +1,17 @@
+
+Route::get('/dashboard', function () {
+    $statistics = [
+        'totalPenduduk' => 5234,
+        'jumlahKK' => 1456,
+        'jumlahRT' => 8,
+        'jumlahRW' => 3,
+        'laki' => 2678,
+        'perempuan' => 2556,
+        'anggaran' => 2450000000,
+        'realisasi' => 1850000000,
+    ];
+
+    return Inertia::render('Dashboard', [
+        'statistics' => $statistics,
+    ]);
+})->name('Dashboard');

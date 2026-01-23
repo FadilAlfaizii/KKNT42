@@ -22,11 +22,13 @@
         "@inertiajs/react": "^2.0.0",
         "@vitejs/plugin-react": "^4.3.4",
         "chart.js": "^4.4.7",
+        "leaflet": "^1.9.4",
         "lucide-react": "^0.469.0",
         "react": "^19.0.0",
         "react-chartjs-2": "^5.3.0",
         "react-dom": "^19.0.0",
         "react-feather": "^2.0.10",
+        "react-leaflet": "^5.0.0",
         "react-router-dom": "^7.1.1"
     }
 }

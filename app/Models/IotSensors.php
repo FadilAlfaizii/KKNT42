@@ -10,7 +10,13 @@ class IotSensors extends Model
 {
     use HasFactory;
     use HasUuids;
-    public $timestamps = false;
+    
+    // Enable timestamps for proper tracking
+    public $timestamps = true;
+    
+    // Use custom timestamp column names
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = null; // Only track creation time
     
     protected $fillable = [
         'farm_id',
@@ -18,6 +24,14 @@ class IotSensors extends Model
         'humidity',
         'ammonia',
         'light_intensity',
+    ];
+
+    protected $casts = [
+        'temperature' => 'decimal:2',
+        'humidity' => 'decimal:2',
+        'ammonia' => 'decimal:2',
+        'light_intensity' => 'decimal:2',
+        'createdAt' => 'datetime',
     ];
 
     public function farm()
