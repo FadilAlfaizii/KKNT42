@@ -1,20 +1,8 @@
 <x-filament-panels::page>
-    @vite(['ekstrak-pdf-kartu-keluarga/index.tsx'])
-    
-    <div class="ekstrak-kk-container">
-        <!-- React App will be mounted here -->
-        <div id="ekstrak-kk-root"></div>
-    </div>
-
-    <style>
-        /* Make the React app fill the Filament card */
-        .ekstrak-kk-container {
-            min-height: 600px;
-        }
-        
-        /* Override any conflicting Filament styles if needed */
-        #ekstrak-kk-root {
-            width: 100%;
-        }
-    </style>
+    <!-- Load pre-built React app from public/ekstrak-kk -->
+    <iframe 
+        src="/ekstrak-kk/index.html" 
+        style="width: 100%; min-height: 800px; border: none; border-radius: 8px;"
+        title="Ekstraktor Kartu Keluarga"
+    ></iframe>
 </x-filament-panels::page>

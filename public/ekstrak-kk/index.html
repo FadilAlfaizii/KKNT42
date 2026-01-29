@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ekstraktor Data Kartu Keluarga</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+      :root {
+        --color-background: 248 250 252; /* slate-50 */
+        --color-surface: 255 255 255; /* white */
+        --color-surface-muted: 241 245 249; /* slate-100 */
+        --color-primary: 22 163 74; /* green-600 */
+        --color-primary-hover: 21 128 61; /* green-700 */
+        --color-text-primary: 15 23 42; /* slate-900 */
+        --color-text-secondary: 100 116 139; /* slate-500 */
+        --color-border: 226 232 240; /* slate-200 */
+        --color-border-hover: 203 213 225; /* slate-300 */
+        --color-success: 22 163 74; /* green-600 */
+        --color-warning: 217 119 6; /* amber-600 */
+        --color-warning-bg: 255 251 235; /* amber-50 */
+        --color-info: 2 132 199; /* sky-600 */
+        --color-info-bg: 224 242 254; /* sky-100 */
+        --color-danger: 220 38 38; /* red-600 */
+        --color-danger-border: 185 28 28; /* red-700 */
+        --color-danger-bg: 254 226 226; /* red-100 */
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-background: 15 23 42; /* slate-900 */
+          --color-surface: 30 41 59; /* slate-800 */
+          --color-surface-muted: 51 65 85; /* slate-700 */
+          --color-primary: 34 197 94; /* green-500 */
+          --color-primary-hover: 22 163 74; /* green-600 */
+          --color-text-primary: 248 250 252; /* slate-50 */
+          --color-text-secondary: 148 163 184; /* slate-400 */
+          --color-border: 51 65 85; /* slate-700 */
+          --color-border-hover: 71 85 105; /* slate-600 */
+          --color-success: 34 197 94; /* green-500 */
+          --color-warning: 251 146 60; /* orange-400 */
+          --color-warning-bg: 67 20 7; /* warm dark */
+          --color-info: 56 189 248; /* sky-400 */
+          --color-info-bg: 7 89 133; /* sky-900 */
+          --color-danger: 248 113 113; /* red-400 */
+          --color-danger-border: 220 38 38; /* red-600 */
+          --color-danger-bg: 127 29 29; /* red-900 */
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              background: 'rgb(var(--color-background) / <alpha-value>)',
+              surface: 'rgb(var(--color-surface) / <alpha-value>)',
+              'surface-muted': 'rgb(var(--color-surface-muted) / <alpha-value>)',
+              primary: 'rgb(var(--color-primary) / <alpha-value>)',
+              'primary-hover': 'rgb(var(--color-primary-hover) / <alpha-value>)',
+              success: 'rgb(var(--color-success) / <alpha-value>)',
+              warning: 'rgb(var(--color-warning) / <alpha-value>)',
+              'warning-bg': 'rgb(var(--color-warning-bg) / <alpha-value>)',
+              info: 'rgb(var(--color-info) / <alpha-value>)',
+              'info-bg': 'rgb(var(--color-info-bg) / <alpha-value>)',
+              danger: 'rgb(var(--color-danger) / <alpha-value>)',
+              'danger-border': 'rgb(var(--color-danger-border) / <alpha-value>)',
+              'danger-bg': 'rgb(var(--color-danger-bg) / <alpha-value>)',
+              'text-primary': 'rgb(var(--color-text-primary) / <alpha-value>)',
+              'text-secondary': 'rgb(var(--color-text-secondary) / <alpha-value>)',
+              border: 'rgb(var(--color-border) / <alpha-value>)',
+              'border-hover': 'rgb(var(--color-border-hover) / <alpha-value>)',
+            },
+            animation: {
+              indeterminate: 'indeterminate-progress 1.5s ease-in-out infinite',
+            },
+            keyframes: {
+              'indeterminate-progress': {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(400%)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.539.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.13.0",
+    "jszip": "https://esm.sh/jszip@^3.10.1",
+    "xlsx": "https://esm.sh/xlsx@^0.18.5",
+    "vite": "https://esm.sh/vite@^7.1.2",
+    "path": "https://esm.sh/path@^0.12.7",
+    "url": "https://esm.sh/url@^0.11.4"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-BbFZgnFi.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BcQMMYbc.css">
+</head>
+  <body class="bg-background text-text-primary">
+    <div id="root"></div>
+  </body>
+</html>

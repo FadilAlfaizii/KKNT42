@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\IotSensorController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\Api\GeminiKKExtractorController;
 use App\Services\PythonKKExtractorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/iot-sensors', [IotSensorController::class, 'store']);
 Route::get('/map/locations', [MapController::class, 'getLocations']);
+
+// KK Extraction API - Gemini AI Backend
+Route::post('/extract-kk-gemini', [GeminiKKExtractorController::class, 'extract']);
+Route::get('/extract-kk-gemini/health', [GeminiKKExtractorController::class, 'healthCheck']);
 
 // KK Extraction API - Python Backend
 Route::post('/extract-kk', function (Request $request) {
