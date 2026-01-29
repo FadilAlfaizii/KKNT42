@@ -2,38 +2,56 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
-class MapPoint extends Model
+class Keluarga extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'name',
-        'category',
-        'address',
-        'description',
-        'latitude',
-        'longitude',
-        'is_active',
         'dusun_id',
+        'no_kk',
+        'kepala_keluarga',
+        'alamat',
+        'rt',
+        'rw',
+        'kelurahan_desa',
+        'kecamatan',
+        'kabupaten_kota',
+        'provinsi',
+        'kode_pos',
+        'status_kk',
+        'tanggal_terbit',
+        'keterangan',
     ];
 
     protected $casts = [
-        'latitude' => 'float',
-        'longitude' => 'float',
-        'is_active' => 'boolean',
+        'tanggal_terbit' => 'date',
     ];
 
     /**
-     * Get the dusun that owns the map point
+     * Get the dusun that owns the keluarga
      */
     public function dusun(): BelongsTo
     {
         return $this->belongsTo(Dusun::class);
+    }
+
+    /**
+     * Get all penduduk (members) of this keluarga
+     */
+    public function penduduks(): HasMany
+    {
+        return $this->hasMany(Penduduk::class);
+    }
+
+    /**
+     * Get jumlah anggota keluarga
+     */
+    public function getJumlahAnggotaAttribute(): int
+    {
+        return $this->penduduks()->count();
     }
 
     /**
@@ -65,5 +83,13 @@ class MapPoint extends Model
 
         // Otherwise, filter by user's dusun
         return $query->where('dusun_id', $user->dusun_id);
+    }
+
+    /**
+     * Scope for active KK
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status_kk', 'AKTIF');
     }
 }

@@ -19,9 +19,9 @@ class EkstrakKartuKeluarga extends Page
 
     protected static ?string $slug = 'ekstrak-kartu-keluarga';
 
-    protected static ?string $navigationGroup = 'Content';
+    protected static ?string $navigationGroup = 'Kependudukan';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 0;
 
     public function getHeading(): string
     {

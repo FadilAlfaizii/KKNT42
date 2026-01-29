@@ -32,6 +32,23 @@ class MapPointResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Informasi Lokasi')
                     ->schema([
+                        Forms\Components\Select::make('dusun_id')
+                            ->label('Dusun')
+                            ->relationship('dusun', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->default(function () {
+                                $user = auth()->user();
+                                // If kadus, auto-assign to their dusun
+                                if ($user && !$user->canAccessAllDusuns() && $user->dusun_id) {
+                                    return $user->dusun_id;
+                                }
+                                return null;
+                            })
+                            ->disabled(fn () => auth()->user() && !auth()->user()->canAccessAllDusuns())
+                            ->dehydrated(true)
+                            ->columnSpanFull(),
                         Forms\Components\TextInput::make('name')
                             ->label('Nama')
                             ->required()
@@ -108,7 +125,15 @@ class MapPointResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->forAuthUser())
             ->columns([
+                Tables\Columns\TextColumn::make('dusun.name')
+                    ->label('Dusun')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('success')
+                    ->visible(fn () => auth()->user()?->canAccessAllDusuns() ?? false),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
@@ -132,6 +157,22 @@ class MapPointResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('dusun_id')
+                    ->label('Dusun')
+                    ->relationship('dusun', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn () => auth()->user()?->canAccessAllDusuns() ?? false),
+                Tables\Filters\SelectFilter::make('category')
+                    ->label('Kategori')
+                    ->options([
+                        'UMKM' => 'UMKM',
+                        'Pendidikan' => 'Pendidikan',
+                        'Olahraga' => 'Olahraga',
+                        'Ibadah' => 'Ibadah',
+                        'Kesehatan' => 'Kesehatan',
+                        'Pemerintah' => 'Pemerintah',
+                    ]),
                 Tables\Filters\TernaryFilter::make('is_active')->label('Status Aktif'),
             ])
             ->actions([

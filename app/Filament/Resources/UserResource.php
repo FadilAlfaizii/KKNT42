@@ -128,6 +128,15 @@ class UserResource extends Resource
 
                                 Forms\Components\TextInput::make('bio')
                                     ->label('Biografi'),
+
+                                Forms\Components\Select::make('dusun_id')
+                                    ->label('Dusun')
+                                    ->relationship('dusun', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->helperText('Pilih dusun untuk Kadus. Kosongkan untuk Kades/SuperAdmin.')
+                                    ->columnSpanFull(),
                             ])
                             ->columns(2),
 

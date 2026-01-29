@@ -7,6 +7,7 @@ use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 use Opcodes\LogViewer\Facades\LogViewer;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Load custom API routes
+        Route::middleware('web')
+            ->group(base_path('routes/api_extract_kk.php'));
+
         Table::configureUsing(function (Table $table): void {
             $table
                 ->emptyStateHeading('No data yet')
