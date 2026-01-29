@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/inertia-react';
+import { Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { MapPin, Download, ChevronDown, Leaf, ArrowRight, Sparkles, TreePine } from 'lucide-react';
 import hero from '../../../public/images/hero.png'

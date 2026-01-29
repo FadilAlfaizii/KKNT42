@@ -21,7 +21,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // create permissions
         Permission::create(['name' => 'access_log_viewer']);
 
-        $roles = ["super_admin", "farmer"];
+        $roles = ["super_admin", "farmer", "kepala_desa", "operator", "sekretaris", "kadus", "pengelola_data"];
 
         foreach ($roles as $key => $role) {
             $roleCreated = (new (RoleResource::getModel()))->create(

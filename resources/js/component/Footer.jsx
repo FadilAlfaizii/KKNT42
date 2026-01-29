@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/inertia-react';
+import { Link } from '@inertiajs/react';
 import Logo from '../../../public/images/logo-2.png'
 
 const Footer = () => {
