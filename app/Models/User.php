@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -35,6 +36,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         'bio',
         'email',
         'password',
+        'dusun_id',
     ];
 
     /**
@@ -92,5 +94,29 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         $this->addMediaConversion('thumb')
             ->fit(Fit::Contain, 300, 300)
             ->nonQueued();
+    }
+
+    /**
+     * Get the dusun that the user belongs to
+     */
+    public function dusun(): BelongsTo
+    {
+        return $this->belongsTo(Dusun::class);
+    }
+
+    /**
+     * Check if user is a Kadus (Kepala Dusun)
+     */
+    public function isKadus(): bool
+    {
+        return $this->hasRole('kadus');
+    }
+
+    /**
+     * Check if user is Kades (Kepala Desa) or SuperAdmin
+     */
+    public function canAccessAllDusuns(): bool
+    {
+        return $this->hasRole(['super_admin', 'kades']) || $this->isSuperAdmin();
     }
 }

@@ -46,6 +46,10 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
                 Navigation\NavigationGroup::make()
+                    ->label('Kependudukan')
+                    ->icon('heroicon-o-users')
+                    ->collapsible(false),
+                Navigation\NavigationGroup::make()
                     ->label('Content') // !! To-Do: lang
                     ->collapsible(false),
                 Navigation\NavigationGroup::make()
@@ -59,6 +63,10 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(),
             ])
             ->navigationItems([
+                Navigation\NavigationItem::make('Kembali ke Situs Utama')
+                    ->url('/', shouldOpenInNewTab: false)
+                    ->icon('heroicon-o-arrow-left-circle')
+                    ->sort(-1),
                 Navigation\NavigationItem::make('Log Viewer') // !! To-Do: lang
                     ->visible(fn(): bool => auth()->user()->can('access_log_viewer'))
                     ->url(config('app.url').'/'.config('log-viewer.route_path'), shouldOpenInNewTab: true)
