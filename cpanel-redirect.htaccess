@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Replace 'yourusername' and 'laravel-app' with your actual paths
+    RewriteRule ^(.*)$ /home/yourusername/laravel-app/public/$1 [L]
+</IfModule>
