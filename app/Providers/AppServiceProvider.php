@@ -25,10 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Load custom API routes
-        Route::middleware('web')
-            ->group(base_path('routes/api_extract_kk.php'));
-
         Table::configureUsing(function (Table $table): void {
             $table
                 ->emptyStateHeading('No data yet')

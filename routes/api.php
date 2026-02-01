@@ -22,5 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Public API Routes
 Route::get('/map/locations', [MapController::class, 'getLocations']);
 
-// Note: KK Extraction API routes are registered in AppServiceProvider
-// via routes/api_extract_kk.php file
+// Note: KK Extraction API routes removed (legacy Python extractor)
