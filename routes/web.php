@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\StatistikController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -50,9 +51,7 @@ Route::get('/tentang', function () {
 
 Route::get('/peta-interaktif', [MapController::class, 'index'])->name('PetaInteraktif');
 
-Route::get('/statistik', function () {
-    return Inertia::render('Statistik');
-})->name('Statistik');
+Route::get('/statistik', [StatistikController::class, 'index'])->name('Statistik');
 
 Route::get('/artikel', [ArticleController::class, 'index'])->name('Artikel');
 

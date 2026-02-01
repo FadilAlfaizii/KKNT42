@@ -73,6 +73,12 @@ class MapPointResource extends Resource
                             ->label('Deskripsi')
                             ->rows(3)
                             ->columnSpanFull(),
+                        Forms\Components\TextInput::make('image_url')
+                            ->label('URL Gambar')
+                            ->url()
+                            ->placeholder('https://drive.google.com/uc?export=view&id=...')
+                            ->helperText('Link gambar (Google Drive atau URL lainnya)')
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
                 Forms\Components\Section::make('Koordinat')

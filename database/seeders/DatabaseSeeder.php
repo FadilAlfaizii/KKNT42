@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             DusunSeeder::class,
             RolesAndPermissionsSeeder::class,
             UsersTableSeeder::class,
+            MapPointSeeder::class, // Import lokasi dari CSV
         ]);
 
         Artisan::call('shield:generate --all');

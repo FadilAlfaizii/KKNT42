@@ -245,7 +245,10 @@ class PendudukResource extends Resource
                 Tables\Columns\TextColumn::make('nama_lengkap')
                     ->label('Nama')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (Penduduk $record): string => $record->tempat_lahir 
+                        ? "{$record->tempat_lahir}, " . ($record->tanggal_lahir ? \Carbon\Carbon::parse($record->tanggal_lahir)->format('d/m/Y') : '-')
+                        : ''),
                 Tables\Columns\TextColumn::make('jenis_kelamin')
                     ->label('JK')
                     ->badge()
@@ -258,9 +261,21 @@ class PendudukResource extends Resource
                     ->label('Umur')
                     ->suffix(' th')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('agama')
+                    ->label('Agama')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('pendidikan')
+                    ->label('Pendidikan')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(20)
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('pekerjaan')
                     ->label('Pekerjaan')
                     ->searchable()
+                    ->sortable()
                     ->limit(20)
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('status_dalam_keluarga')
@@ -292,12 +307,80 @@ class PendudukResource extends Resource
                     ->searchable()
                     ->preload()
                     ->visible(fn () => auth()->user()?->canAccessAllDusuns() ?? false),
+                    
                 Tables\Filters\SelectFilter::make('jenis_kelamin')
                     ->label('Jenis Kelamin')
                     ->options([
                         'LAKI-LAKI' => 'Laki-laki',
                         'PEREMPUAN' => 'Perempuan',
                     ]),
+                    
+                Tables\Filters\SelectFilter::make('agama')
+                    ->label('Agama')
+                    ->options([
+                        'Islam' => 'Islam',
+                        'Kristen' => 'Kristen',
+                        'Katolik' => 'Katolik',
+                        'Hindu' => 'Hindu',
+                        'Buddha' => 'Buddha',
+                        'Konghucu' => 'Konghucu',
+                    ])
+                    ->searchable(),
+                    
+                Tables\Filters\SelectFilter::make('pendidikan')
+                    ->label('Pendidikan')
+                    ->options([
+                        'Tidak/Belum Sekolah' => 'Tidak/Belum Sekolah',
+                        'Belum Tamat SD/Sederajat' => 'Belum Tamat SD/Sederajat',
+                        'Tamat SD/Sederajat' => 'Tamat SD/Sederajat',
+                        'SLTP/Sederajat' => 'SLTP/Sederajat',
+                        'SLTA/Sederajat' => 'SLTA/Sederajat',
+                        'Diploma I/II' => 'Diploma I/II',
+                        'Akademi/Diploma III/S. Muda' => 'Akademi/Diploma III/S. Muda',
+                        'Diploma IV/Strata I' => 'Diploma IV/Strata I',
+                        'Strata II' => 'Strata II',
+                        'Strata III' => 'Strata III',
+                    ])
+                    ->searchable(),
+                    
+                Tables\Filters\SelectFilter::make('pekerjaan')
+                    ->label('Pekerjaan')
+                    ->options(function () {
+                        return \App\Models\Penduduk::query()
+                            ->distinct()
+                            ->whereNotNull('pekerjaan')
+                            ->where('pekerjaan', '!=', '')
+                            ->pluck('pekerjaan', 'pekerjaan')
+                            ->take(50)
+                            ->toArray();
+                    })
+                    ->searchable(),
+                    
+                Tables\Filters\SelectFilter::make('status_perkawinan')
+                    ->label('Status Perkawinan')
+                    ->options([
+                        'BELUM KAWIN' => 'Belum Kawin',
+                        'KAWIN' => 'Kawin',
+                        'CERAI HIDUP' => 'Cerai Hidup',
+                        'CERAI MATI' => 'Cerai Mati',
+                    ]),
+                    
+                Tables\Filters\SelectFilter::make('status_dalam_keluarga')
+                    ->label('Status Dalam Keluarga')
+                    ->options([
+                        'KEPALA KELUARGA' => 'Kepala Keluarga',
+                        'SUAMI' => 'Suami',
+                        'ISTRI' => 'Istri',
+                        'ANAK' => 'Anak',
+                        'MENANTU' => 'Menantu',
+                        'CUCU' => 'Cucu',
+                        'ORANGTUA' => 'Orangtua',
+                        'MERTUA' => 'Mertua',
+                        'FAMILI LAIN' => 'Famili Lain',
+                        'PEMBANTU' => 'Pembantu',
+                        'LAINNYA' => 'Lainnya',
+                    ]),
+                    
                 Tables\Filters\SelectFilter::make('status_penduduk')
                     ->label('Status Penduduk')
                     ->options([
@@ -308,14 +391,17 @@ class PendudukResource extends Resource
                         'PINDAH' => 'Pindah',
                     ])
                     ->default('TETAP'),
+                    
                 Tables\Filters\Filter::make('umur')
                     ->form([
                         Forms\Components\TextInput::make('umur_dari')
                             ->label('Umur Dari')
-                            ->numeric(),
+                            ->numeric()
+                            ->placeholder('0'),
                         Forms\Components\TextInput::make('umur_sampai')
                             ->label('Umur Sampai')
-                            ->numeric(),
+                            ->numeric()
+                            ->placeholder('100'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -327,7 +413,27 @@ class PendudukResource extends Resource
                                 $data['umur_sampai'],
                                 fn (Builder $query, $umur): Builder => $query->where('umur', '<=', $umur),
                             );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['umur_dari'] ?? null) {
+                            $indicators[] = 'Umur dari: ' . $data['umur_dari'];
+                        }
+                        if ($data['umur_sampai'] ?? null) {
+                            $indicators[] = 'Umur sampai: ' . $data['umur_sampai'];
+                        }
+                        return $indicators;
                     }),
+                    
+                Tables\Filters\Filter::make('dewasa')
+                    ->label('Dewasa (17+)')
+                    ->query(fn (Builder $query): Builder => $query->where('umur', '>=', 17))
+                    ->toggle(),
+                    
+                Tables\Filters\Filter::make('kepala_keluarga')
+                    ->label('Kepala Keluarga')
+                    ->query(fn (Builder $query): Builder => $query->where('status_dalam_keluarga', 'KEPALA KELUARGA'))
+                    ->toggle(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -340,7 +446,21 @@ class PendudukResource extends Resource
                         ->visible(fn () => auth()->user() && (auth()->user()->isSuperAdmin() || auth()->user()->hasRole('kades'))),
                 ]),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('export')
+                    ->label('Export ke Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function ($livewire) {
+                        $query = $livewire->getFilteredTableQuery();
+                        return response()->streamDownload(function () use ($query) {
+                            echo \App\Helpers\ExportHelper::exportPendudukToExcel($query->get());
+                        }, 'penduduk-' . now()->format('Y-m-d-His') . '.csv');
+                    }),
+            ])
             ->defaultSort('created_at', 'desc')
+            ->persistFiltersInSession()
+            ->filtersFormColumns(3)
             ->emptyStateHeading('Belum Ada Data Penduduk')
             ->emptyStateDescription('Data penduduk akan muncul setelah ekstraksi KK melalui panel "Ekstrak Kartu Keluarga"')
             ->emptyStateIcon('heroicon-o-user-group');

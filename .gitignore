@@ -17,3 +17,19 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Temporary files
+*.tmp
+*.log
+*.cache
+
+# Test & Debug files
+test_*.php
+debug_*.php
+pipeline_*.py
+*.pyc
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db

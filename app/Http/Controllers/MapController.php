@@ -38,6 +38,7 @@ class MapController extends Controller
                 'longitude',
                 'address',
                 'description',
+                'image_url',
             ])
             ->map(function ($location) {
                 return [
@@ -48,7 +49,7 @@ class MapController extends Controller
                     'longitude' => (float) $location->longitude,
                     'address' => $location->address,
                     'description' => $location->description,
-                    'image_url' => null,
+                    'image_url' => $location->image_url,
                 ];
             })
             ->values()

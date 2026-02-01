@@ -38,7 +38,9 @@
         "laravel/tinker": "^2.8",
         "league/commonmark": "^2.4",
         "opcodesio/log-viewer": "^3.11",
+        "phpoffice/phpspreadsheet": "^5.4",
         "riodwanto/filament-ace-editor": "^1.0",
+        "smalot/pdfparser": "^2.12",
         "stichoza/google-translate-php": "^5.2",
         "tomatophp/filament-media-manager": "^1.1",
         "z3d0x/filament-logger": "^0.7.2"
@@ -57,7 +59,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/KKExtractionHelpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

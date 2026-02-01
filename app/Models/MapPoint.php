@@ -16,6 +16,7 @@ class MapPoint extends Model
         'category',
         'address',
         'description',
+        'image_url',
         'latitude',
         'longitude',
         'is_active',

@@ -181,6 +181,14 @@ class KeluargaResource extends Resource
                     ->label('RW')
                     ->sortable()
                     ->alignCenter(),
+                Tables\Columns\TextColumn::make('kelurahan_desa')
+                    ->label('Kelurahan/Desa')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('kecamatan')
+                    ->label('Kecamatan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('penduduks_count')
                     ->label('Jumlah Anggota')
                     ->counts('penduduks')
@@ -213,12 +221,75 @@ class KeluargaResource extends Resource
                     ->searchable()
                     ->preload()
                     ->visible(fn () => auth()->user()?->canAccessAllDusuns() ?? false),
+                    
                 Tables\Filters\SelectFilter::make('status_kk')
                     ->label('Status KK')
                     ->options([
                         'AKTIF' => 'Aktif',
                         'TIDAK AKTIF' => 'Tidak Aktif',
-                    ]),
+                    ])
+                    ->default('AKTIF'),
+                    
+                Tables\Filters\SelectFilter::make('rt')
+                    ->label('RT')
+                    ->options(function () {
+                        return \App\Models\Keluarga::query()
+                            ->distinct()
+                            ->whereNotNull('rt')
+                            ->where('rt', '!=', '')
+                            ->orderBy('rt')
+                            ->pluck('rt', 'rt')
+                            ->toArray();
+                    })
+                    ->searchable(),
+                    
+                Tables\Filters\SelectFilter::make('rw')
+                    ->label('RW')
+                    ->options(function () {
+                        return \App\Models\Keluarga::query()
+                            ->distinct()
+                            ->whereNotNull('rw')
+                            ->where('rw', '!=', '')
+                            ->orderBy('rw')
+                            ->pluck('rw', 'rw')
+                            ->toArray();
+                    })
+                    ->searchable(),
+                    
+                Tables\Filters\Filter::make('jumlah_anggota')
+                    ->label('Jumlah Anggota')
+                    ->form([
+                        Forms\Components\TextInput::make('min_anggota')
+                            ->label('Minimal')
+                            ->numeric()
+                            ->placeholder('0'),
+                        Forms\Components\TextInput::make('max_anggota')
+                            ->label('Maksimal')
+                            ->numeric()
+                            ->placeholder('10'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                isset($data['min_anggota']),
+                                fn (Builder $query): Builder => $query->has('penduduks', '>=', $data['min_anggota']),
+                            )
+                            ->when(
+                                isset($data['max_anggota']),
+                                fn (Builder $query): Builder => $query->has('penduduks', '<=', $data['max_anggota']),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if (isset($data['min_anggota'])) {
+                            $indicators[] = 'Min anggota: ' . $data['min_anggota'];
+                        }
+                        if (isset($data['max_anggota'])) {
+                            $indicators[] = 'Max anggota: ' . $data['max_anggota'];
+                        }
+                        return $indicators;
+                    }),
+                    
                 Tables\Filters\Filter::make('tanggal_terbit')
                     ->form([
                         Forms\Components\DatePicker::make('terbit_dari')
@@ -236,7 +307,22 @@ class KeluargaResource extends Resource
                                 $data['terbit_sampai'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('tanggal_terbit', '<=', $date),
                             );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['terbit_dari'] ?? null) {
+                            $indicators[] = 'Terbit dari: ' . \Carbon\Carbon::parse($data['terbit_dari'])->format('d/m/Y');
+                        }
+                        if ($data['terbit_sampai'] ?? null) {
+                            $indicators[] = 'Terbit sampai: ' . \Carbon\Carbon::parse($data['terbit_sampai'])->format('d/m/Y');
+                        }
+                        return $indicators;
                     }),
+                    
+                Tables\Filters\Filter::make('keluarga_besar')
+                    ->label('Keluarga Besar (5+ anggota)')
+                    ->query(fn (Builder $query): Builder => $query->has('penduduks', '>=', 5))
+                    ->toggle(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -249,7 +335,21 @@ class KeluargaResource extends Resource
                         ->visible(fn () => auth()->user() && (auth()->user()->isSuperAdmin() || auth()->user()->hasRole('kades'))),
                 ]),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('export')
+                    ->label('Export ke Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function ($livewire) {
+                        $query = $livewire->getFilteredTableQuery();
+                        return response()->streamDownload(function () use ($query) {
+                            echo \App\Helpers\ExportHelper::exportKeluargaToExcel($query->get());
+                        }, 'keluarga-' . now()->format('Y-m-d-His') . '.csv');
+                    }),
+            ])
             ->defaultSort('created_at', 'desc')
+            ->persistFiltersInSession()
+            ->filtersFormColumns(2)
             ->emptyStateHeading('Belum Ada Data Keluarga')
             ->emptyStateDescription('Data keluarga akan muncul setelah ekstraksi KK melalui panel "Ekstrak Kartu Keluarga"')
             ->emptyStateIcon('heroicon-o-document-text');
