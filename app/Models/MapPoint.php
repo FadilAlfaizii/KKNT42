@@ -13,20 +13,18 @@ class MapPoint extends Model
 
     protected $fillable = [
         'name',
-        'category',
-        'address',
+        'type',
         'description',
         'image_url',
         'latitude',
         'longitude',
-        'is_active',
+        'icon',
         'dusun_id',
     ];
 
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',
-        'is_active' => 'boolean',
     ];
 
     /**

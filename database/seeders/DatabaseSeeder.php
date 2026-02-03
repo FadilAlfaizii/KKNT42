@@ -21,5 +21,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Artisan::call('shield:generate --all');
+        
+        // Assign permissions to roles AFTER shield:generate
+        $this->call([
+            AssignRolePermissionsSeeder::class,
+        ]);
     }
 }

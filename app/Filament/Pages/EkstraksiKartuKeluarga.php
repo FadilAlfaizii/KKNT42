@@ -307,6 +307,21 @@ class EkstraksiKartuKeluarga extends Page
                     $message .= "\n⚠ {$results['skipped']} data dilewati";
                 }
                 
+                // Show unauthorized dusun warning if kadus tried to import other dusun
+                if (!empty($results['unauthorized_dusun'])) {
+                    $unauthorizedList = '';
+                    foreach ($results['unauthorized_dusun'] as $dusunName => $count) {
+                        $unauthorizedList .= "\n• {$dusunName}: {$count} KK ditolak";
+                    }
+                    
+                    Notification::make()
+                        ->warning()
+                        ->title('⚠ Akses Ditolak untuk Beberapa Data')
+                        ->body("Anda hanya dapat mengimport data dari dusun Anda sendiri. Data berikut ditolak:" . $unauthorizedList)
+                        ->persistent()
+                        ->send();
+                }
+                
                 Notification::make()
                     ->success()
                     ->title('Import Berhasil!')

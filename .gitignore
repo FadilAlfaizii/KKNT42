@@ -22,12 +22,27 @@ yarn-error.log
 *.tmp
 *.log
 *.cache
+.DS_Store
+Thumbs.db
 
 # Test & Debug files
 test_*.php
 debug_*.php
 pipeline_*.py
 *.pyc
+
+# Optimization
+/bootstrap/cache/*.php
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+
+# Logs
+/storage/logs/*.log
+!/storage/logs/.gitignore
 __pycache__/
 
 # OS files

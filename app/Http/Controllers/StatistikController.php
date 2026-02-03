@@ -12,7 +12,7 @@ class StatistikController extends Controller
 {
     public function index()
     {
-        // Total counts
+        // Total counts - TIDAK ADA status_dasar, jadi hitung semua
         $totalPenduduk = Penduduk::count();
         $totalKK = Keluarga::count();
         $lakiLaki = Penduduk::where('jenis_kelamin', 'LAKI-LAKI')->count();
@@ -39,14 +39,14 @@ class StatistikController extends Controller
             ['label' => 'Perempuan', 'count' => $perempuan],
         ];
 
-        // 7. Kategori Titik Lokasi (Bar Chart)
-        $kategoriLokasi = MapPoint::select('category', DB::raw('count(*) as count'))
-            ->groupBy('category')
+        // 7. Kategori Titik Lokasi (Bar Chart) - gunakan 'type' bukan 'category'
+        $kategoriLokasi = MapPoint::select('type', DB::raw('count(*) as count'))
+            ->groupBy('type')
             ->orderBy('count', 'desc')
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => $this->translateCategory($item->category),
+                    'label' => $this->translateCategory($item->type),
                     'count' => $item->count
                 ];
             });
@@ -79,7 +79,11 @@ class StatistikController extends Controller
 
     private function getDistribusiUsia()
     {
-        $penduduk = Penduduk::whereNotNull('tanggal_lahir')->get();
+        // Gunakan field tanggal_lahir (bukan tanggallahir)
+        $penduduk = Penduduk::whereNotNull('tanggal_lahir')
+            ->where('tanggal_lahir', '!=', '')
+            ->where('tanggal_lahir', '!=', '0000-00-00')
+            ->get();
         
         $ranges = [
             '0-4' => 0,
@@ -131,6 +135,7 @@ class StatistikController extends Controller
 
     private function getPekerjaanStats()
     {
+        // Database sekarang menyimpan text langsung, bukan kode
         return Penduduk::select('pekerjaan', DB::raw('count(*) as count'))
             ->whereNotNull('pekerjaan')
             ->where('pekerjaan', '!=', '')
@@ -140,7 +145,7 @@ class StatistikController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => ucwords(strtolower(str_replace('_', ' ', $item->pekerjaan))),
+                    'label' => $item->pekerjaan ?: 'Tidak Diketahui',
                     'count' => $item->count
                 ];
             });
@@ -148,6 +153,7 @@ class StatistikController extends Controller
 
     private function getPendidikanStats()
     {
+        // Database sekarang menyimpan text langsung
         return Penduduk::select('pendidikan', DB::raw('count(*) as count'))
             ->whereNotNull('pendidikan')
             ->where('pendidikan', '!=', '')
@@ -156,7 +162,7 @@ class StatistikController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => ucwords(strtolower(str_replace('_', ' ', $item->pendidikan))),
+                    'label' => $item->pendidikan ?: 'Tidak Diketahui',
                     'count' => $item->count
                 ];
             });
@@ -164,16 +170,16 @@ class StatistikController extends Controller
 
     private function getGolonganDarahStats()
     {
+        // Database sekarang menyimpan text langsung
         return Penduduk::select('golongan_darah', DB::raw('count(*) as count'))
             ->whereNotNull('golongan_darah')
             ->where('golongan_darah', '!=', '')
-            ->where('golongan_darah', '!=', '-')
             ->groupBy('golongan_darah')
             ->orderBy('count', 'desc')
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => strtoupper($item->golongan_darah),
+                    'label' => $item->golongan_darah ?: 'Tidak Diketahui',
                     'count' => $item->count
                 ];
             });
@@ -181,16 +187,16 @@ class StatistikController extends Controller
 
     private function getAgamaStats()
     {
+        // Database sekarang menyimpan text langsung
         return Penduduk::select('agama', DB::raw('count(*) as count'))
             ->whereNotNull('agama')
             ->where('agama', '!=', '')
-            ->where('agama', '!=', '-')
             ->groupBy('agama')
             ->orderBy('count', 'desc')
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => ucfirst(strtolower($item->agama)),
+                    'label' => $item->agama ?: 'Tidak Diketahui',
                     'count' => $item->count
                 ];
             });

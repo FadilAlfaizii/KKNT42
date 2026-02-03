@@ -28,15 +28,15 @@ class KeluargaResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    // Read-only resource - data comes from Ekstrak Kartu Keluarga
+    // Allow create and edit for manual data management
     public static function canCreate(): bool
     {
-        return false;
+        return true;
     }
 
     public static function canEdit($record): bool
     {
-        return false;
+        return true;
     }
 
     public static function canDelete($record): bool
@@ -326,6 +326,48 @@ class KeluargaResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                
+                // Quick Action: Tambah Anggota
+                Tables\Actions\Action::make('tambah_anggota')
+                    ->label('Tambah Anggota')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('success')
+                    ->url(fn ($record) => PendudukResource::getUrl('create', ['keluarga_id' => $record->id]))
+                    ->tooltip('Tambah anggota baru ke KK ini'),
+                
+                // Quick Action: Ganti Kepala Keluarga
+                Tables\Actions\Action::make('ganti_kepala')
+                    ->label('Ganti Kepala KK')
+                    ->icon('heroicon-o-user-circle')
+                    ->color('warning')
+                    ->form([
+                        Forms\Components\Select::make('new_kepala_id')
+                            ->label('Pilih Kepala Keluarga Baru')
+                            ->options(fn ($record) => $record->penduduks->pluck('nama_lengkap', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->helperText('Pilih dari anggota keluarga yang ada'),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $newKepala = \App\Models\Penduduk::find($data['new_kepala_id']);
+                        if ($newKepala) {
+                            $record->update([
+                                'kepala_keluarga' => $newKepala->nama_lengkap
+                            ]);
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->success()
+                                ->title('Kepala Keluarga Diperbarui')
+                                ->body("Kepala keluarga berhasil diubah menjadi {$newKepala->nama_lengkap}")
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Ganti Kepala Keluarga')
+                    ->modalDescription('Pilih anggota keluarga yang akan menjadi kepala keluarga baru')
+                    ->tooltip('Ganti kepala keluarga'),
+                    
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn () => auth()->user() && (auth()->user()->isSuperAdmin() || auth()->user()->hasRole('kades'))),
             ])
@@ -355,6 +397,11 @@ class KeluargaResource extends Resource
             ->emptyStateIcon('heroicon-o-document-text');
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->forAuthUser();
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -366,6 +413,8 @@ class KeluargaResource extends Resource
     {
         return [
             'index' => Pages\ListKeluargas::route('/'),
+            'create' => Pages\CreateKeluarga::route('/create'),
+            'edit' => Pages\EditKeluarga::route('/{record}/edit'),
         ];
     }
 }

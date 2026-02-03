@@ -18,6 +18,7 @@ class Penduduk extends Model
         'tempat_lahir',
         'tanggal_lahir',
         'umur',
+        'umur_manual',
         'agama',
         'pendidikan',
         'pekerjaan',
@@ -54,25 +55,33 @@ class Penduduk extends Model
     }
 
     /**
-     * Calculate age from tanggal_lahir
+     * Get umur - prioritas ke umur_manual, fallback ke kalkulasi dari tanggal_lahir
      */
-    public function calculateUmur(): void
+    public function getUmurAttribute(): ?int
     {
-        if ($this->tanggal_lahir) {
-            $this->umur = Carbon::parse($this->tanggal_lahir)->age;
+        // Prioritas 1: Gunakan umur_manual jika ada
+        if (isset($this->attributes['umur_manual']) && $this->attributes['umur_manual']) {
+            return (int) $this->attributes['umur_manual'];
         }
+        
+        // Prioritas 2: Hitung dari tanggal_lahir
+        if (isset($this->attributes['tanggal_lahir']) && $this->attributes['tanggal_lahir']) {
+            try {
+                return Carbon::parse($this->attributes['tanggal_lahir'])->age;
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        
+        return null;
     }
 
     /**
-     * Boot method to auto-calculate age
+     * Boot method
      */
     protected static function boot()
     {
         parent::boot();
-
-        static::saving(function ($penduduk) {
-            $penduduk->calculateUmur();
-        });
     }
 
     /**

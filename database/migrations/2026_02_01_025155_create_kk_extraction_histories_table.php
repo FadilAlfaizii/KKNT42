@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kk_extraction_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->uuid('user_id');
             $table->string('extraction_mode'); // 'manual' or 'gemini'
             $table->boolean('use_mapping')->default(false);
             $table->integer('total_files');
@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('excel_file_path')->nullable(); // Path to generated Excel
             $table->enum('status', ['completed', 'failed', 'imported', 'partial'])->default('completed');
             $table->text('notes')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

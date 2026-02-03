@@ -58,15 +58,25 @@ Route::get('/artikel', [ArticleController::class, 'index'])->name('Artikel');
 Route::get('/artikel/{id}', [ArticleController::class, 'show'])->name('DetailArtikel');
 
 Route::get('/dashboard', function () {
+    // Get real-time statistics from database
+    $totalPenduduk = \App\Models\Penduduk::count();
+    $jumlahKK = \App\Models\Keluarga::count();
+    $laki = \App\Models\Penduduk::where('jenis_kelamin', 'LAKI-LAKI')->count();
+    $perempuan = \App\Models\Penduduk::where('jenis_kelamin', 'PEREMPUAN')->count();
+    
+    // Get RT/RW counts from keluarga
+    $jumlahRT = \App\Models\Keluarga::distinct('rt')->count('rt');
+    $jumlahRW = \App\Models\Keluarga::distinct('rw')->count('rw');
+    
     $statistics = [
-        'totalPenduduk' => 5234,
-        'jumlahKK' => 1456,
-        'jumlahRT' => 8,
-        'jumlahRW' => 3,
-        'laki' => 2678,
-        'perempuan' => 2556,
-        'anggaran' => 2450000000,
-        'realisasi' => 1850000000,
+        'totalPenduduk' => $totalPenduduk,
+        'jumlahKK' => $jumlahKK,
+        'jumlahRT' => $jumlahRT,
+        'jumlahRW' => $jumlahRW,
+        'laki' => $laki,
+        'perempuan' => $perempuan,
+        'anggaran' => 2450000000,  // Static - from government budget
+        'realisasi' => 1850000000,  // Static - manual input by admin
     ];
 
     return Inertia::render('Dashboard', [

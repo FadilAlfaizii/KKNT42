@@ -16,4 +16,15 @@ class EditPenduduk extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+    
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Auto-update umur if tanggal_lahir changed
+        if (!empty($data['tanggal_lahir'])) {
+            $tanggalLahir = \Carbon\Carbon::parse($data['tanggal_lahir']);
+            $data['umur'] = $tanggalLahir->age;
+        }
+        
+        return $data;
+    }
 }

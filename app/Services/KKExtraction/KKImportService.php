@@ -60,7 +60,7 @@ class KKImportService
         // Check duplicates in database
         if (!empty($niks)) {
             $existingNiks = Penduduk::whereIn('nik', $niks)
-                ->select('nik', 'nama_lengkap', 'keluarga_id')
+                ->select('nik', 'nama', 'keluarga_id')
                 ->with('keluarga:id,no_kk')
                 ->get()
                 ->groupBy('nik');
@@ -68,7 +68,7 @@ class KKImportService
             foreach ($existingNiks as $nik => $penduduks) {
                 $duplicates['in_database'][$nik] = $penduduks->map(function ($p) {
                     return [
-                        'nama' => $p->nama_lengkap,
+                        'nama' => $p->nama,
                         'no_kk' => $p->keluarga->no_kk ?? '-',
                     ];
                 })->toArray();
@@ -94,12 +94,27 @@ class KKImportService
             'imported_penduduk' => 0,
             'skipped' => 0,
             'errors' => [],
+            'unauthorized_dusun' => [], // Track dusun yang tidak boleh diakses
         ];
 
         Log::info('KK Import Started', [
             'total_records' => count($extractedData),
-            'skip_duplicates' => $skipDuplicates
+            'skip_duplicates' => $skipDuplicates,
+            'user_id' => auth()->id(),
+            'user_role' => auth()->user()->roles->pluck('name')->first(),
+            'user_dusun_id' => auth()->user()->dusun_id,
         ]);
+
+        // Validate kadus authorization
+        $user = auth()->user();
+        $isKadus = $user->hasRole('kadus');
+        $allowedDusunId = $user->dusun_id;
+        
+        if ($isKadus && !$allowedDusunId) {
+            $results['errors'][] = 'Error: Akun Kadus belum terdaftar ke dusun tertentu. Hubungi admin.';
+            Log::warning('Kadus without dusun_id attempted import', ['user_id' => $user->id]);
+            return $results;
+        }
 
         try {
             DB::beginTransaction();
@@ -138,6 +153,23 @@ class KKImportService
                             $dusunName = 'Belum Ditentukan';
                         }
                         $dusun = $this->findOrCreateDusun($dusunName);
+                        
+                        // Security check: Kadus can only import their own dusun data
+                        if ($isKadus && $dusun->id !== $allowedDusunId) {
+                            $results['errors'][] = "Unauthorized: KK {$no_kk} dari {$dusun->name} tidak boleh diimport oleh Kadus dusun lain";
+                            $results['unauthorized_dusun'][$dusun->name] = ($results['unauthorized_dusun'][$dusun->name] ?? 0) + 1;
+                            $results['skipped'] += count($members);
+                            
+                            Log::warning('Kadus attempted to import unauthorized dusun', [
+                                'user_id' => $user->id,
+                                'user_dusun_id' => $allowedDusunId,
+                                'attempted_dusun_id' => $dusun->id,
+                                'attempted_dusun_name' => $dusun->name,
+                                'kk' => $no_kk,
+                            ]);
+                            
+                            continue; // Skip this KK
+                        }
                         
                         $keluarga = Keluarga::create([
                             'dusun_id' => $dusun->id,
@@ -178,20 +210,28 @@ class KKImportService
                             [
                                 'keluarga_id' => $keluarga->id,
                                 'dusun_id' => $keluarga->dusun_id,
-                                'nama_lengkap' => $member['nama'] ?? '-',
-                                'jenis_kelamin' => $this->mapJenisKelamin($member['sex'] ?? null),
-                                'tempat_lahir' => $member['tempatlahir'] ?? '-',
+                                // Data Pribadi - REQUIRED FIELDS
+                                'nama_lengkap' => $member['nama'] ?? 'TIDAK DIKETAHUI',
+                                'nik' => $nik,
+                                'jenis_kelamin' => $this->mapJenisKelamin($member['sex'] ?? 1),
+                                // Optional fields
+                                'tempat_lahir' => $member['tempatlahir'] ?? null,
                                 'tanggal_lahir' => $this->parseDate($member['tanggallahir'] ?? null),
+                                'no_akta_lahir' => $member['akta_lahir'] ?? null,
+                                'golongan_darah' => $this->mapGolDarah($member['golongan_darah_id'] ?? null),
                                 'agama' => $this->mapAgama($member['agama_id'] ?? null),
+                                'kewarganegaraan' => $this->mapWarganegara($member['warganegara_id'] ?? 1),
+                                // Data Orang Tua
+                                'nama_ayah' => $member['nama_ayah'] ?? null,
+                                'nama_ibu' => $member['nama_ibu'] ?? null,
+                                // Pendidikan & Pekerjaan  
                                 'pendidikan' => $this->mapPendidikan($member['pendidikan_kk_id'] ?? null),
                                 'pekerjaan' => $this->mapPekerjaan($member['pekerjaan_id'] ?? null),
+                                // Status
                                 'status_perkawinan' => $this->mapStatusKawin($member['status_kawin'] ?? null),
                                 'status_dalam_keluarga' => $this->mapKKLevel($member['kk_level'] ?? null),
-                                'nama_ayah' => $member['nama_ayah'] ?? '-',
-                                'nama_ibu' => $member['nama_ibu'] ?? '-',
-                                'golongan_darah' => $this->mapGolDarah($member['golongan_darah_id'] ?? null),
-                                'kewarganegaraan' => $this->mapWarganegara($member['warganegara_id'] ?? null),
                                 'status_penduduk' => 'TETAP',
+                                'keterangan' => null,
                             ]
                         );
                         
@@ -223,10 +263,27 @@ class KKImportService
     }
 
     /**
-     * Find or create Dusun
+     * Find or create Dusun with normalization
      */
     private function findOrCreateDusun(string $namaDusun): Dusun
     {
+        // Log original input
+        Log::info('findOrCreateDusun CALLED', [
+            'original_input' => $namaDusun,
+            'input_length' => strlen($namaDusun),
+            'has_leading_space' => $namaDusun !== ltrim($namaDusun),
+        ]);
+        
+        // Normalize dusun name: convert Roman to Arabic numerals
+        $originalName = $namaDusun;
+        $namaDusun = $this->normalizeDusunName($namaDusun);
+        
+        Log::info('After normalization', [
+            'original' => $originalName,
+            'normalized' => $namaDusun,
+            'changed' => $originalName !== $namaDusun,
+        ]);
+        
         $dusun = Dusun::where('name', $namaDusun)->first();
         
         if (!$dusun) {
@@ -251,10 +308,78 @@ class KKImportService
                 'is_active' => true,
             ]);
             
-            Log::info('Dusun Created', ['name' => $namaDusun, 'code' => $code]);
+            Log::info('Dusun Created (NEW)', [
+                'name' => $namaDusun,
+                'code' => $code,
+                'id' => $dusun->id,
+            ]);
         }
         
+        Log::info('findOrCreateDusun RESULT', [
+            'dusun_id' => $dusun->id,
+            'dusun_name' => $dusun->name,
+            'is_new' => $dusun->wasRecentlyCreated ?? false,
+        ]);
+        
         return $dusun;
+    }
+
+    /**
+     * Normalize dusun name: convert Roman numerals to Arabic
+     */
+    private function normalizeDusunName(string $name): string
+    {
+        Log::info('normalizeDusunName START', [
+            'input' => $name,
+            'length' => strlen($name),
+            'bytes' => bin2hex($name), // Debug hex representation
+        ]);
+        
+        // Aggressive whitespace removal (including non-breaking spaces, tabs, etc.)
+        $name = preg_replace('/\s+/u', ' ', $name); // Replace all whitespace with single space
+        $name = trim($name);
+        
+        Log::info('After aggressive trim', [
+            'name' => $name,
+            'length' => strlen($name),
+        ]);
+        
+        // Map of Roman to Arabic numerals (up to 15)
+        $romanToArabic = [
+            'I' => '1', 'II' => '2', 'III' => '3', 'IV' => '4', 'V' => '5',
+            'VI' => '6', 'VII' => '7', 'VIII' => '8', 'IX' => '9', 'X' => '10',
+            'XI' => '11', 'XII' => '12', 'XIII' => '13', 'XIV' => '14', 'XV' => '15',
+        ];
+        
+        // Pattern: "DUSUN I", "Dusun III", etc. (case-insensitive)
+        foreach ($romanToArabic as $roman => $arabic) {
+            // Match "DUSUN {roman}" with flexible spacing
+            if (preg_match('/^dusun\s+' . $roman . '$/i', $name)) {
+                Log::info('Roman numeral matched', [
+                    'pattern' => "dusun {$roman}",
+                    'converted_to' => "Dusun {$arabic}",
+                ]);
+                return 'Dusun ' . $arabic;
+            }
+            // Match just "{roman}" (e.g., "I", "III")
+            if (strtoupper($name) === $roman) {
+                Log::info('Pure Roman matched', [
+                    'input' => $name,
+                    'converted_to' => "Dusun {$arabic}",
+                ]);
+                return 'Dusun ' . $arabic;
+            }
+        }
+        
+        // If already in "Dusun 1" format, standardize capitalization
+        if (preg_match('/^dusun\s+(\d+)$/i', $name, $matches)) {
+            Log::info('Arabic format detected', ['standardized' => "Dusun {$matches[1]}"]);
+            return 'Dusun ' . $matches[1];
+        }
+        
+        // Return as-is if no pattern matched
+        Log::warning('No pattern matched - returning as-is', ['name' => $name]);
+        return $name;
     }
 
     /**

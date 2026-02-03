@@ -1308,13 +1308,14 @@ PROMPT;
         ];
         
         // Ensure all rows have all target columns
-        foreach ($normalizedData as &$row) {
+        foreach ($normalizedData as &$dataRow) {
             foreach ($targetColumns as $col) {
-                if (!isset($row[$col])) {
-                    $row[$col] = '-';
+                if (!isset($dataRow[$col])) {
+                    $dataRow[$col] = '-';
                 }
             }
         }
+        unset($dataRow); // CRITICAL: Unset reference to avoid variable conflict
         
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -1425,8 +1426,8 @@ PROMPT;
         foreach (range('A', 'Z') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-        // Double letter columns (AA to AP)
-        foreach (range('A', 'P') as $col) {
+        // Double letter columns (AA to AQ)
+        foreach (range('A', 'Q') as $col) {
             $sheet->getColumnDimension('A' . $col)->setAutoSize(true);
         }
         

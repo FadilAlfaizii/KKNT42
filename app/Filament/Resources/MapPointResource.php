@@ -53,7 +53,7 @@ class MapPointResource extends Resource
                             ->label('Nama')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Select::make('category')
+                        Forms\Components\Select::make('type')
                             ->label('Kategori')
                             ->required()
                             ->options([
@@ -65,10 +65,6 @@ class MapPointResource extends Resource
                                 'Pemerintah' => 'Pemerintah',
                             ])
                             ->searchable(),
-                        Forms\Components\TextInput::make('address')
-                            ->label('Alamat')
-                            ->maxLength(255)
-                            ->columnSpanFull(),
                         Forms\Components\Textarea::make('description')
                             ->label('Deskripsi')
                             ->rows(3)
@@ -119,12 +115,6 @@ class MapPointResource extends Resource
                             ->showZoomControl()
                             ->draggable(),
                     ]),
-                Forms\Components\Section::make('Status')
-                    ->schema([
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Aktif')
-                            ->default(true),
-                    ]),
             ]);
     }
 
@@ -144,17 +134,9 @@ class MapPointResource extends Resource
                     ->label('Nama')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Kategori')
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('address')
-                    ->label('Alamat')
-                    ->wrap()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Aktif')
-                    ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
@@ -169,7 +151,7 @@ class MapPointResource extends Resource
                     ->searchable()
                     ->preload()
                     ->visible(fn () => auth()->user()?->canAccessAllDusuns() ?? false),
-                Tables\Filters\SelectFilter::make('category')
+                Tables\Filters\SelectFilter::make('type')
                     ->label('Kategori')
                     ->options([
                         'UMKM' => 'UMKM',
@@ -179,7 +161,6 @@ class MapPointResource extends Resource
                         'Kesehatan' => 'Kesehatan',
                         'Pemerintah' => 'Pemerintah',
                     ]),
-                Tables\Filters\TernaryFilter::make('is_active')->label('Status Aktif'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Edit'),

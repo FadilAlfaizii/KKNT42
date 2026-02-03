@@ -117,6 +117,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
      */
     public function canAccessAllDusuns(): bool
     {
-        return $this->hasRole(['super_admin', 'kades']) || $this->isSuperAdmin();
+        return $this->hasRole(['super_admin', 'kepala_desa', 'sekretaris', 'operator', 'pengelola_data']) 
+            || $this->isSuperAdmin();
     }
 }

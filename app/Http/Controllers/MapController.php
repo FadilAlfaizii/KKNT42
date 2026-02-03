@@ -15,53 +15,39 @@ class MapController extends Controller
 
     public function getLocations(Request $request)
     {
-        $csvLocations = $this->getLocationsFromCsv();
+        // Query dari database, bukan CSV lagi
+        $query = MapPoint::query();
 
-        if (!empty($csvLocations)) {
-            if ($request->has('category') && $request->category !== 'all') {
-                $category = $this->normalizeCategory($request->category);
-                $csvLocations = array_values(array_filter(
-                    $csvLocations,
-                    fn ($location) => $location['category'] === $category
-                ));
-            }
-
-            return response()->json($csvLocations);
+        // Filter by category/type jika diminta
+        if ($request->has('category') && $request->category !== 'all') {
+            $category = $this->normalizeCategory($request->category);
+            $query->where('type', $category);
         }
 
-        $locations = MapPoint::where('is_active', true)
-            ->get([
+        $locations = $query->get([
                 'id',
                 'name',
-                'category',
+                'type',
                 'latitude',
                 'longitude',
-                'address',
                 'description',
                 'image_url',
+                'icon',
             ])
             ->map(function ($location) {
                 return [
                     'id' => $location->id,
                     'name' => $location->name,
-                    'category' => $this->normalizeCategory($location->category),
+                    'category' => $this->normalizeCategory($location->type), // Frontend expects 'category'
                     'latitude' => (float) $location->latitude,
                     'longitude' => (float) $location->longitude,
-                    'address' => $location->address,
                     'description' => $location->description,
                     'image_url' => $location->image_url,
+                    'icon' => $location->icon,
                 ];
             })
             ->values()
             ->all();
-
-        if ($request->has('category') && $request->category !== 'all') {
-            $category = $this->normalizeCategory($request->category);
-            $locations = array_values(array_filter(
-                $locations,
-                fn ($location) => $location['category'] === $category
-            ));
-        }
 
         return response()->json($locations);
     }

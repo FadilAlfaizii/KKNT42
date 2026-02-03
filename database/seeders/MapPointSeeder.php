@@ -129,13 +129,11 @@ class MapPointSeeder extends Seeder
             try {
                 MapPoint::create([
                     'name' => $name,
-                    'category' => $mappedCategory,
-                    'address' => $address,
-                    'description' => $fullDescription,
+                    'type' => $mappedCategory,  // Using 'type' column, not 'category'
+                    'description' => $fullDescription . (!empty($address) ? "\n\nAlamat: {$address}" : ''),
                     'image_url' => $imageUrl,
                     'latitude' => $latitude,
                     'longitude' => $longitude,
-                    'is_active' => true,
                     'dusun_id' => $defaultDusun->id,
                 ]);
 
